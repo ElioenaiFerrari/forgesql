@@ -1,3 +1,5 @@
 migrations
 *.sqlite
 bin
+Dockerfile
+.forgesql

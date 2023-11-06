@@ -34,14 +34,10 @@ func (c *Config) GetEnv(label string) Env {
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:     "init",
+	Short:   "Initialize forgeSQL",
+	Long:    "Initialize forgeSQL creating a .forgesql.yml file in the current directory.",
+	Example: "forgesql init",
 	Run: func(cmd *cobra.Command, args []string) {
 		var migrationsPath string
 		var envsSeparetedByComma string
@@ -50,8 +46,9 @@ to quickly create a Cobra application.`,
 		fmt.Println("Migrations path (default: migrations): ")
 		fmt.Scanln(&migrationsPath)
 
+		dir, _ := os.Getwd()
 		if migrationsPath == "" {
-			migrationsPath = "migrations"
+			migrationsPath = fmt.Sprintf("%s/migrations", dir)
 		}
 
 		fmt.Println("Environments separated by comma (default: dev): ")
@@ -95,7 +92,7 @@ to quickly create a Cobra application.`,
 		}
 
 		// Create yaml file based in migrations_path
-		if err := os.WriteFile(".forgesql.yml", b, 0755); err != nil {
+		if err := os.WriteFile(fmt.Sprintf("%s/.forgesql.yml", dir), b, 0755); err != nil {
 			panic(err)
 		}
 	},
