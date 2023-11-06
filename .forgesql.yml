@@ -1,4 +1,0 @@
-migrations_path: ./migrations
-env:
-- label: prd
-  db_url: sqlite://test.sqlite
