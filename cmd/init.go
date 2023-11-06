@@ -46,7 +46,13 @@ var initCmd = &cobra.Command{
 		fmt.Println("Migrations path (default: migrations): ")
 		fmt.Scanln(&migrationsPath)
 
-		dir, _ := os.Executable()
+		dir, _ := os.Getwd()
+
+		if len(os.Args) > 2 {
+			dir = os.Args[2]
+			fmt.Println(dir)
+		}
+
 		if migrationsPath == "" {
 			migrationsPath = fmt.Sprintf("%s/migrations", dir)
 		}
