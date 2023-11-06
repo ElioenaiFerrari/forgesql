@@ -2,4 +2,4 @@ migrations
 *.sqlite
 bin
 Dockerfile
-.forgesql
+.forgesql.yml
