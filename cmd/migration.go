@@ -24,8 +24,8 @@ var config Config
 
 func init() {
 	file, err := os.ReadFile(".forgesql.yml")
-	if err != nil {
-		panic(err)
+	if os.IsNotExist(err) {
+		return
 	}
 
 	if err := yaml.Unmarshal(file, &config); err != nil {
@@ -149,13 +149,18 @@ func generateCmd(ctx context.Context, flags *pflag.FlagSet) {
 // migrationCmd represents the migration command
 var migrationCmd = &cobra.Command{
 	Use:   "migration",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Migrations",
+	Long: `
+	Migrations are a convenient way to alter your database schema over time in a
+	way that can easily be replicated and shared with others.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	ForgeSQL uses a simple convention to generate migrations files. Each migration
+	file name contains a timestamp which allows ForgeSQL to determine the order of
+	the migrations.`,
+	Example: `
+	forgesql migration --generate --name create_example
+	forgesql migration --up --environment dev
+	forgesql migration --down --environment dev`,
 	Run: func(cmd *cobra.Command, args []string) {
 		flags := cmd.Flags()
 		ctx := cmd.Context()

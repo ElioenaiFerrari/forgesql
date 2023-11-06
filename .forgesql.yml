@@ -1,4 +1,4 @@
-migrations_path: ./migrations
+migrations_path: /Users/elioenaiferrari/Documents/projects/forgesql/migrations
 env:
-- label: prd
-  db_url: sqlite://test.sqlite
+- label: dev
+  db_url: sqlite://db.sqlite
