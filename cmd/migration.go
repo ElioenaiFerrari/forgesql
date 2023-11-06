@@ -14,10 +14,24 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	"gopkg.in/yaml.v2"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
+
+var config Config
+
+func init() {
+	file, err := os.ReadFile(".forgesql.yml")
+	if err != nil {
+		panic(err)
+	}
+
+	if err := yaml.Unmarshal(file, &config); err != nil {
+		panic(err)
+	}
+}
 
 func getDBDriverAndURL(connection string) (string, string) {
 	sqliteExp := regexp.MustCompile("sqlite://")
@@ -37,24 +51,18 @@ func getDBDriverAndURL(connection string) (string, string) {
 }
 
 func upOrDown(ctx context.Context, flags *pflag.FlagSet, operation string) {
-	env, err := flags.GetString("environment")
-	if err != nil {
-		panic(err)
-	}
+	env, _ := flags.GetString("environment")
 
-	connection, err := flags.GetString("connection")
-	if err != nil {
-		panic(err)
-	}
+	currentEnv := config.GetEnv(env)
 
-	driver, url := getDBDriverAndURL(connection)
+	driver, url := getDBDriverAndURL(currentEnv.DBURL)
 
 	db, err := sql.Open(driver, url)
 	if err != nil {
 		panic(err)
 	}
 
-	migrationsPath := fmt.Sprintf("migrations/%s", env)
+	migrationsPath := fmt.Sprintf("%s/%s", config.MigrationsPath, currentEnv.Label)
 
 	if _, err := os.Stat(migrationsPath); os.IsNotExist(err) {
 		fmt.Println("No migrations found")
@@ -94,7 +102,6 @@ func upOrDown(ctx context.Context, flags *pflag.FlagSet, operation string) {
 
 		_, err = tx.ExecContext(ctx, string(content))
 		if err != nil {
-			tx.Rollback()
 			panic(err)
 		}
 
@@ -114,7 +121,9 @@ func generateCmd(ctx context.Context, flags *pflag.FlagSet) {
 		panic(err)
 	}
 
-	migrationsPath := fmt.Sprintf("migrations/%s", env)
+	currentEnv := config.GetEnv(env)
+
+	migrationsPath := fmt.Sprintf("%s/%s", config.MigrationsPath, currentEnv.Label)
 	if _, err := os.Stat(migrationsPath); os.IsNotExist(err) {
 		os.MkdirAll(migrationsPath, 0755)
 	}
@@ -188,5 +197,4 @@ func init() {
 	migrationCmd.Flags().BoolP("up", "u", false, "up migrations")
 	migrationCmd.Flags().BoolP("down", "d", false, "down migrations")
 	migrationCmd.Flags().StringP("name", "n", "create_example", "migration name")
-	migrationCmd.Flags().StringP("connection", "c", "sqlite://db.sqlite", "migration url")
 }
