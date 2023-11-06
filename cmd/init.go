@@ -46,9 +46,8 @@ var initCmd = &cobra.Command{
 		fmt.Println("Migrations path (default: migrations): ")
 		fmt.Scanln(&migrationsPath)
 
-		dir, _ := os.Executable()
 		if migrationsPath == "" {
-			migrationsPath = fmt.Sprintf("%s/migrations", dir)
+			migrationsPath = "./migrations"
 		}
 
 		fmt.Println("Environments separated by comma (default: dev): ")
@@ -92,8 +91,8 @@ var initCmd = &cobra.Command{
 		}
 
 		// Create yaml file based in migrations_path
-		pathname := fmt.Sprintf("%s/.forgesql.yml", dir)
-		if err := os.WriteFile(pathname, b, 0755); err != nil {
+
+		if err := os.WriteFile(".forgesql.yml", b, 0755); err != nil {
 			panic(err)
 		}
 	},
